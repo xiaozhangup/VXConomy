@@ -55,7 +55,7 @@ public class XConomyVelocity{
         this.manager = server.getCommandManager();
 
         regCommand("bal", new VCommandBalance(), "balance");
-        regCommand("pay", new VCommandPay());
+        regCommand("pay", new VCommandPay(), "money");
 
         server.getChannelRegistrar().register(aca);
         server.getChannelRegistrar().register(acb);
