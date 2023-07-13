@@ -19,12 +19,17 @@
 package me.yic.xconomy;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.Command;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import me.yic.xconomy.command.vcom.VCommandBalance;
+import me.yic.xconomy.command.vcom.VCommandPay;
 import me.yic.xconomy.info.SyncInfo;
 import me.yic.xconomy.listeners.Vsync;
 import org.slf4j.Logger;
@@ -33,6 +38,7 @@ import org.slf4j.Logger;
 public class XConomyVelocity{
     private static XConomyVelocity instance;
     public static String syncversion = SyncInfo.syncversion;
+    public CommandManager manager;
     public ProxyServer server;
     public Logger logger;
 
@@ -46,10 +52,14 @@ public class XConomyVelocity{
         instance = this;
         this.server = server;
         this.logger = logger;
+        this.manager = server.getCommandManager();
 
+        regCommand("bal", new VCommandBalance(), "balance");
+        regCommand("pay", new VCommandPay());
 
         server.getChannelRegistrar().register(aca);
         server.getChannelRegistrar().register(acb);
+
 
         logger.info("XConomy successfully enabled!");
         logger.info("===== YiC =====");
@@ -62,8 +72,15 @@ public class XConomyVelocity{
         server.getEventManager().register(this, new Vsync());
     }
 
-
     public static XConomyVelocity getInstance() {
         return instance;
+    }
+
+    private void regCommand(String name, Command command, String... aliases) {
+        CommandMeta commandMeta = manager.metaBuilder(name)
+                .aliases(aliases)
+                .plugin(this)
+                .build();
+        manager.register(commandMeta, command);
     }
 }
