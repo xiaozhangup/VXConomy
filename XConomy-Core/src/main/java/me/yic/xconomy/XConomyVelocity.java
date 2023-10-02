@@ -70,6 +70,7 @@ public class XConomyVelocity{
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
         server.getEventManager().register(this, new Vsync());
+        //server.getEventManager().register(this, new VPlayerEvent());
     }
 
     public static XConomyVelocity getInstance() {

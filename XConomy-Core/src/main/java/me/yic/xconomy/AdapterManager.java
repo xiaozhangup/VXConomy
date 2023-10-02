@@ -35,6 +35,9 @@ public class AdapterManager {
 
     public final static CPlugin PLUGIN = new CPlugin();
 
+    //public static ScheduledExecutorService ScheduledThreadPool;
+    //public static ExecutorService FixedThreadPool;
+
     public static String translateColorCodes(MessageConfig message) {
         return CChat.translateAlternateColorCodes('&', MessagesManager.messageFile.getString(message.toString()));
     }
@@ -56,4 +59,20 @@ public class AdapterManager {
         }
         return !XConomyLoad.Config.SYNCDATA_TYPE.equals(SyncChannalType.REDIS);
     }
+    public static boolean checkisMainThread(){
+        return Thread.currentThread().getName().equalsIgnoreCase("Server thread") ||
+                Thread.currentThread().getName().contains("Region Scheduler Thread #");
+    }
+
+    public static void runTaskAsynchronously(Runnable runnable){
+        PLUGIN.runTaskAsynchronously(runnable);
+    }
+
+    public static void runTaskLaterAsynchronously(Runnable runnable, long seconds){
+        PLUGIN.runTaskLaterAsynchronously(runnable, seconds * 20L);
+    }
+
+/*    public static ScheduledFuture<?> runTaskTimerAsynchronously(Runnable runnable, long seconds){
+        return ScheduledThreadPool.scheduleAtFixedRate(runnable, seconds, seconds, TimeUnit.SECONDS);
+    }*/
 }

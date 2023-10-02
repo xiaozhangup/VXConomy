@@ -1,5 +1,5 @@
 /*
- *  This file (Baltop.java) is a part of project XConomy
+ *  This file (RunBaltop.java) is a part of project XConomy
  *  Copyright (C) YiC and contributors
  *
  *  This program is free software: you can redistribute it and/or modify it
@@ -18,31 +18,21 @@
  */
 package me.yic.xconomy.task;
 
+import me.yic.xconomy.XConomy;
 import me.yic.xconomy.XConomyLoad;
-import me.yic.xconomy.data.DataCon;
-import me.yic.xconomy.data.DataLink;
-import me.yic.xconomy.data.caches.Cache;
-import me.yic.xconomy.data.sql.SQL;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
-public class Baltop extends BukkitRunnable {
+public class RunBaltop {
+    private static BukkitTask refresherTask = null;
+    public static void runstart() {
+        int time = XConomyLoad.Config.REFRESH_TIME;
+        refresherTask = Bukkit.getScheduler().runTaskTimerAsynchronously(XConomy.getInstance(), new Baltop(), time * 20L, time * 20L);
+    }
 
-    @Override
-    public void run() {
-        Cache.baltop_papi.clear();
-        Cache.baltop.clear();
-        SQL.getBaltop();
-        DataCon.sumbal();
-        if (Bukkit.getOnlinePlayers().isEmpty()) {
-            Cache.clearCache();
-        }else{
-            if (XConomyLoad.DConfig.isMySQL() && XConomyLoad.Config.PAY_TIPS) {
-                for (Player pp : Bukkit.getOnlinePlayers()) {
-                    DataLink.updatelogininfo(pp.getUniqueId());
-                }
-            }
+    public static void stop() {
+        if (refresherTask != null) {
+            refresherTask.cancel();
         }
     }
 }

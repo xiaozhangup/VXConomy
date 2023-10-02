@@ -38,6 +38,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandCore {
 
@@ -127,19 +129,42 @@ public class CommandCore {
     }
 
     protected static boolean isDouble(String s) {
+        if (s.length() > 20){
+            return false;
+        }
         if (s.matches(".*[a-zA-Z].*")) {
             return false;
         }
-        try {
-            Double.parseDouble(s);
-            BigDecimal value = new BigDecimal(s);
 
-            if (value.compareTo(BigDecimal.ONE) >= 0) {
-                return !DataFormat.isMAX(DataFormat.formatString(s));
+        BigDecimal value;
+        if (DataFormat.isint){
+            try {
+                Integer.parseInt(s);
+                value = new BigDecimal(s);
+            } catch (NumberFormatException ignored) {
+                return false;
             }
+        }else {
+            try {
+                Double.parseDouble(s);
+                Pattern pattern = Pattern.compile("\\.\\d+");
+                Matcher matcher = pattern.matcher(s);
 
-        } catch (NumberFormatException ignored) {
-            return false;
+                if (matcher.find()) {
+                    String decimalPart = matcher.group();
+                    int decimalPlaces = decimalPart.length() - 1;
+                    if (decimalPlaces > 2){
+                        return false;
+                    }
+                }
+                value = new BigDecimal(s);
+            } catch (NumberFormatException ignored) {
+                return false;
+            }
+        }
+
+        if (value.compareTo(BigDecimal.ZERO) > 0) {
+            return !DataFormat.isMAX(DataFormat.formatString(s));
         }
 
         return true;
@@ -184,11 +209,11 @@ public class CommandCore {
     }
 
     public static void showVersion(CSender sender) {
-        sender.sendMessage(PREFIX + "§6 XConomy §f(Version: "
+        sender.sendMessage(PREFIX + "§6XConomy §f(Version: "
                 + XConomy.PVersion + ") §6|§7 Author: §f" + MessagesManager.getAuthor());
         String trs = MessagesManager.getTranslatorS();
         if (trs != null) {
-            sender.sendMessage(PREFIX + "§7 Translator (system): §f" + trs);
+            sender.sendMessage(PREFIX + "§7Translator (system): §f" + trs);
         }
     }
 

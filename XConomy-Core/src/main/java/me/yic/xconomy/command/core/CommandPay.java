@@ -25,10 +25,11 @@ import me.yic.xconomy.adapter.comp.CSender;
 import me.yic.xconomy.data.DataCon;
 import me.yic.xconomy.data.DataFormat;
 import me.yic.xconomy.data.syncdata.PlayerData;
+import me.yic.xconomy.depend.NonPlayerPlugin;
 import me.yic.xconomy.info.MessageConfig;
 import me.yic.xconomy.info.PermissionINFO;
 import me.yic.xconomy.lang.MessagesManager;
-import me.yic.xconomy.task.CompletableFutureTask;
+import me.yic.xconomy.task.ReceivePerCheck;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -59,6 +60,11 @@ public class CommandPay extends CommandCore{
 
         if (args.length != 2) {
             sendHelpMessage(sender, 1);
+            return true;
+        }
+
+        if (NonPlayerPlugin.SimpleCheckNonPlayerAccount(args[0])) {
+            sendMessages(sender, PREFIX + translateColorCodes(MessageConfig.NO_ACCOUNT));
             return true;
         }
 
@@ -104,7 +110,7 @@ public class CommandPay extends CommandCore{
         String realname = pd.getName();
         if (PermissionINFO.getRPaymentPermission(targetUUID)) {
             if (AdapterManager.foundvaultOfflinePermManager) {
-                if (!CompletableFutureTask.hasreceivepermission(target, targetUUID)) {
+                if (!ReceivePerCheck.hasreceivepermission(target, targetUUID)) {
                     sendMessages(sender, PREFIX + translateColorCodes("no_receive_permission"));
                     return true;
                 }

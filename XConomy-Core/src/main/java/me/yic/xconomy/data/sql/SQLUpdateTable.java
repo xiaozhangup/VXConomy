@@ -51,21 +51,11 @@ public class SQLUpdateTable extends SQL {
         }
     }
 
+
     public static void updataTable_record() {
         if (XConomyLoad.DConfig.isMySQL() && XConomyLoad.Config.TRANSACTION_RECORD) {
             Connection connection = database.getConnectionAndCheck();
             try {
-                //PreparedStatement statementa = connection.prepareStatement("desc " + tableRecordName + " datetime");
-                //ResultSet rs = statementa.executeQuery();
-                //if (!rs.next()) {
-                //    XConomy.getInstance().logger("升级数据库表格。。。", 0, tableRecordName);
-                //    Timestamp dd = new Timestamp((new Date()).getTime());
-                //    PreparedStatement statementb = connection.prepareStatement("alter table " + tableRecordName + " add column datetime datetime not null default ?");
-                //    statementb.setTimestamp(1, dd);
-                //    statementb.executeUpdate();
-                //    statementb.close();
-                //}
-
                 PreparedStatement statementa = connection.prepareStatement("desc " + tableRecordName + " date");
                 ResultSet rs = statementa.executeQuery();
                 if (rs.next()) {

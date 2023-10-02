@@ -20,6 +20,7 @@ package me.yic.xconomy.listeners;
 
 import me.yic.xconomy.XConomyBungee;
 import me.yic.xconomy.data.syncdata.SyncMessage;
+import me.yic.xconomy.data.syncdata.tab.SyncTabJoin;
 import me.yic.xconomy.info.SyncType;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -30,6 +31,8 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BCsync implements Listener {
 
@@ -81,6 +84,14 @@ public class BCsync implements Listener {
                         sd.setRUniqueId(p.getUniqueId());
                     }
                 }
+            }else if (ob instanceof SyncTabJoin) {
+                SyncTabJoin sj = (SyncTabJoin) ob;
+                String sign = sj.getSign();
+                List<String> allname = new ArrayList<>();
+                for (ProxiedPlayer pn : XConomyBungee.getInstance().getProxy().getPlayers()){
+                    allname.add(pn.getName());
+                }
+                sj.setallPlayers(allname);
             }
             oos.writeObject(ob);
             oos.flush();

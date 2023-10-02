@@ -33,9 +33,12 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @SuppressWarnings("unused")
 public class DataLink{
+    public static boolean hasnonplayerplugin = false;
 
     public static boolean create() {
         switch (XConomyLoad.DConfig.getStorageType()) {
@@ -55,10 +58,15 @@ public class DataLink{
                 SQLSetup.setupMySqlTable();
                 break;
 
+            case 3:
+                XConomy.getInstance().logger("数据保存方式", 0, " - MariaDB");
+                SQLSetup.setupMySqlTable();
+                break;
+
         }
 
         if (SQL.con()) {
-            if (XConomyLoad.DConfig.getStorageType() == 2) {
+            if (XConomyLoad.DConfig.getStorageType() == 2 || XConomyLoad.DConfig.getStorageType() == 3) {
                 SQL.getwaittimeout();
             }
             SQL.createTable();
@@ -88,7 +96,7 @@ public class DataLink{
 
     public static void updatelogininfo(UUID uid) {
         if (XConomyLoad.DConfig.canasync) {
-            XConomyLoad.runTaskAsynchronously(() -> SQLLogin.updatelogininfo(uid));
+            AdapterManager.runTaskAsynchronously(() -> SQLLogin.updatelogininfo(uid));
         } else {
             SQLLogin.updatelogininfo(uid);
         }
@@ -96,7 +104,7 @@ public class DataLink{
 
     public static void selectlogininfo(CPlayer pp) {
         if (XConomyLoad.DConfig.canasync) {
-            AdapterManager.PLUGIN.runTaskLaterAsynchronously(() -> SQLLogin.getPlayerlogin(pp), 20L);
+            AdapterManager.runTaskLaterAsynchronously(() -> SQLLogin.getPlayerlogin(pp), 1L);
         } else {
             SQLLogin.getPlayerlogin(pp);
         }
@@ -106,8 +114,16 @@ public class DataLink{
         SQL.deletePlayerData(u.toString());
     }
 
-    public static void getBalNonPlayer(String u) {
-        SQL.getNonPlayerData(u);
+    public static BigDecimal getBalNonPlayer(String u) {
+        if (AdapterManager.checkisMainThread()) {
+            try {
+                return CompletableFuture.supplyAsync(() -> SQL.getNonPlayerData(u)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            return SQL.getNonPlayerData(u);
+        }
     }
 
     public static void getTopBal() {
@@ -137,17 +153,33 @@ public class DataLink{
         return SQLCreateNewAccount.newPlayer(uid, name, null);
     }
 
+    public static boolean newAccount(String name) {
+        return SQLCreateNewAccount.createNonPlayerAccount(name);
+    }
 
-    public static <T> void getPlayerData(T key) {
-        if (key instanceof UUID) {
-            SQL.getPlayerData((UUID) key);
-        } else if (key instanceof String) {
-            SQL.getPlayerData((String) key);
+    public static <T> PlayerData getPlayerData(T key) {
+        if (AdapterManager.checkisMainThread()) {
+            try {
+                return CompletableFuture.supplyAsync(() -> exgetPlayerData(key)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            return exgetPlayerData(key);
         }
     }
 
+    private static <T> PlayerData exgetPlayerData(T key) {
+        if (key instanceof UUID) {
+            return SQL.getPlayerData((UUID) key);
+        } else if (key instanceof String) {
+            return SQL.getPlayerData((String) key);
+        }
+        return null;
+    }
+
     public static void saveall(String targettype, BigDecimal amount, Boolean isAdd, RecordInfo ri) {
-        XConomyLoad.runTaskAsynchronously(() -> {
+        AdapterManager.runTaskAsynchronously(() -> {
             if (targettype.equalsIgnoreCase("all")) {
                 SQL.saveall(targettype, null, amount, isAdd, ri);
             } else if (targettype.equalsIgnoreCase("online")) {

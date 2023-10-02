@@ -1,5 +1,5 @@
 /*
- *  This file (CompletableFutureTask.java) is a part of project XConomy
+ *  This file (NonPlayerPlugin.java) is a part of project XConomy
  *  Copyright (C) YiC and contributors
  *
  *  This program is free software: you can redistribute it and/or modify it
@@ -16,15 +16,21 @@
  *  with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package me.yic.xconomy.task;
 
-import me.yic.xconomy.adapter.comp.CPlayer;
+package me.yic.xconomy.depend;
 
-import java.util.UUID;
+import me.yic.xconomy.XConomyLoad;
+import me.yic.xconomy.data.DataCon;
 
-public class CompletableFutureTask {
+public class NonPlayerPlugin {
 
-    public static boolean hasreceivepermission(CPlayer target, UUID targetUUID) {
+    public static boolean SimpleCheckNonPlayerAccount(String name) {
+        if (!XConomyLoad.Config.NON_PLAYER_ACCOUNT) {
+            return false;
+        }
+        if (XConomyLoad.Config.NON_PLAYER_ACCOUNT_SUBSTRING != null) {
+            return DataCon.containinfieldslist(name);
+        }
         return false;
     }
 }

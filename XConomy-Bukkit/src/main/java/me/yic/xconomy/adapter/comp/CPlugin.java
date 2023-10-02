@@ -52,6 +52,11 @@ public class CPlugin implements iPlugin {
     }
 
     @Override
+    public void runTaskAsynchronously(Runnable ra) {
+        Bukkit.getScheduler().runTaskAsynchronously(XConomy.getInstance(), ra);
+    }
+
+    @Override
     public void runTaskLaterAsynchronously(Runnable ra, long time) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(XConomy.getInstance(), ra, time);
     }

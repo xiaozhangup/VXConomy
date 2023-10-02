@@ -31,6 +31,7 @@ public class DefaultConfig {
     public static CConfig config;
 
     public DefaultConfig() {
+        //setMaxThread();
         setUUIDMode();
         setnonplayeraccount();
         setformatbalance();
@@ -72,6 +73,10 @@ public class DefaultConfig {
 
     public String SYNCDATA_SIGN = config.getString("SyncData.sign");
 
+    //==================================================
+    public String RE_WORLD = config.getString("Region-Thread.world");
+    public int RE_X = config.getInt("Region-Thread.range-x");
+    public int RE_Y = config.getInt("Region-Thread.range-y");
 
     private int getrankingsize() {
         return Math.min(config.getInt("Settings.ranking-size"), 100);
@@ -106,6 +111,17 @@ public class DefaultConfig {
             XConomy.getInstance().logger(null, 1, "Error getting balance custom format");
         }
     }
+
+/*    public void setMaxThread(){
+        if (config.contains("Settings.core-poolsize")) {
+            MAX_THREAD = config.getInt("Settings.core-poolsize");
+            if (MAX_THREAD <= 1){
+                MAX_THREAD = 1;
+            }
+        }
+        AdapterManager.ScheduledThreadPool = Executors.newScheduledThreadPool(MAX_THREAD / 2);
+        AdapterManager.FixedThreadPool = Executors.newFixedThreadPool(MAX_THREAD / 2);
+    }*/
 
 
     private void setnonplayeraccount() {

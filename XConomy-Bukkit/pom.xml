@@ -5,7 +5,7 @@
     <parent>
         <artifactId>XConomy</artifactId>
         <groupId>me.yic</groupId>
-        <version>2.23.1</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -78,8 +78,9 @@
                                         <exclude>META-INF/*</exclude>
                                         <exclude>me/yic/xconomy/XConomy.class</exclude>
                                         <exclude>me/yic/xconomy/data/ImportData.class</exclude>
-                                        <exclude>me/yic/xconomy/task/CompletableFutureTask.class</exclude>
+                                        <exclude>me/yic/xconomy/task/ReceivePerCheck.class</exclude>
                                         <exclude>me/yic/xconomy/adapter/comp/*</exclude>
+                                        <exclude>me/yic/xconomy/depend/*</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -121,10 +122,6 @@
 
     <repositories>
         <repository>
-            <id>glaremasters repo</id>
-            <url>https://repo.glaremasters.me/repository/towny/</url>
-        </repository>
-        <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
@@ -139,6 +136,11 @@
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <!--Towny-->
+        <repository>
+            <id>glaremasters repo</id>
+            <url>https://repo.glaremasters.me/repository/towny/</url>
         </repository>
     </repositories>
 
@@ -168,7 +170,7 @@
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
         <!--Enterprise-->
@@ -178,6 +180,7 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
+        <!--Towny-->
         <dependency>
             <groupId>com.palmergames.bukkit.towny</groupId>
             <artifactId>towny</artifactId>
@@ -188,7 +191,7 @@
         <dependency>
             <groupId>me.yic</groupId>
             <artifactId>XConomy-Core</artifactId>
-            <version>2.23.1</version>
+            <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

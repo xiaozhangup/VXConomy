@@ -31,6 +31,11 @@ public class CPlugin implements iPlugin {
     }
 
     @Override
+    public void runTaskAsynchronously(Runnable ra) {
+
+    }
+
+    @Override
     public void runTaskLaterAsynchronously(Runnable ra, long time) {
 
     }

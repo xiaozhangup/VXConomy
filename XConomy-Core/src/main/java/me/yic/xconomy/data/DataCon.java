@@ -50,25 +50,27 @@ public class DataCon {
 
     public static BigDecimal getAccountBalance(String account) {
         if (XConomyLoad.Config.DISABLE_CACHE){
-            DataLink.getBalNonPlayer(account);
+            return DataLink.getBalNonPlayer(account);
         }
-        return CacheNonPlayer.getBalanceFromCacheOrDB(account);
+        BigDecimal bal = CacheNonPlayer.getBalanceFromCacheOrDB(account);
+        if (bal == null){
+            bal =  DataLink.getBalNonPlayer(account);
+        }
+        return bal;
     }
 
     private static <T> PlayerData getPlayerDatai(T u) {
         PlayerData pd = null;
 
         if (XConomyLoad.Config.DISABLE_CACHE) {
-            DataLink.getPlayerData(u);
+            return DataLink.getPlayerData(u);
         }
 
         if (Cache.CacheContainsKey(u)) {
             pd = Cache.getDataFromCache(u);
-        } else {
-            DataLink.getPlayerData(u);
-            if (Cache.CacheContainsKey(u)) {
-                pd = Cache.getDataFromCache(u);
-            }
+        }
+        if (pd == null){
+            pd = DataLink.getPlayerData(u);
         }
         if (AdapterManager.PLUGIN.getOnlinePlayersisEmpty()) {
             Cache.clearCache();
@@ -129,8 +131,8 @@ public class DataCon {
 
         Cache.updateIntoCache(u, pd, newvalue, bal);
 
-        if (XConomyLoad.DConfig.canasync && Thread.currentThread().getName().equalsIgnoreCase("Server thread")) {
-            XConomyLoad.runTaskAsynchronously(() -> {
+        if (XConomyLoad.DConfig.canasync && AdapterManager.checkisMainThread()) {
+            AdapterManager.runTaskAsynchronously(() -> {
                 DataLink.save(pd, isAdd, amount, ri);
                 if (XConomyLoad.getSyncData_Enable()) {
                     SendMessTask(pd);
@@ -163,9 +165,9 @@ public class DataCon {
         }
         CacheNonPlayer.insertIntoCache(u, newvalue);
 
-        if (XConomyLoad.DConfig.canasync && Thread.currentThread().getName().equalsIgnoreCase("Server thread")) {
+        if (XConomyLoad.DConfig.canasync && AdapterManager.checkisMainThread()) {
             final BigDecimal fnewvalue = newvalue;
-            XConomyLoad.runTaskAsynchronously(() -> DataLink.saveNonPlayer(u, amount, fnewvalue, isAdd, ri));
+            AdapterManager.runTaskAsynchronously(() -> DataLink.saveNonPlayer(u, amount, fnewvalue, isAdd, ri));
         } else {
             DataLink.saveNonPlayer(u, amount, newvalue, isAdd, ri);
         }
@@ -176,8 +178,8 @@ public class DataCon {
 
         RecordInfo ri = new RecordInfo(type, command, comment);
 
-        if (XConomyLoad.DConfig.canasync && Thread.currentThread().getName().equalsIgnoreCase("Server thread")) {
-            XConomyLoad.runTaskAsynchronously(() -> DataLink.saveall(targettype, amount, isAdd, ri));
+        if (XConomyLoad.DConfig.canasync && AdapterManager.checkisMainThread()) {
+            AdapterManager.runTaskAsynchronously(() -> DataLink.saveall(targettype, amount, isAdd, ri));
         } else {
             DataLink.saveall(targettype, amount, isAdd, ri);
         }

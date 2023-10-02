@@ -34,6 +34,7 @@ public class XConomyBungee extends Plugin {
         getProxy().registerChannel("xconomy:aca");
         getProxy().registerChannel("xconomy:acb");
         getProxy().getPluginManager().registerListener(this, new BCsync());
+        //getProxy().getPluginManager().registerListener(this, new BCPlayerEvent());
 
         getLogger().info("XConomy successfully enabled!");
         getLogger().info("===== YiC =====");

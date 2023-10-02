@@ -25,8 +25,6 @@ import me.yic.xconomy.XConomyLoad;
 import me.yic.xconomy.adapter.comp.CConfig;
 import me.yic.xconomy.lang.MessagesManager;
 
-import java.util.concurrent.Executors;
-
 public class DataBaseConfig {
 
     public static CConfig config;
@@ -38,21 +36,10 @@ public class DataBaseConfig {
             }
         }
         setHikariConnectionPooling();
-        if (config.contains("Settings.max-threads")) {
-            maxthread = config.getInt("Settings.max-threads");
-            if (maxthread <= 1){
-                maxthread = 1;
-            }
-        }
-        XConomyLoad.FixedThreadPool = Executors.newFixedThreadPool(maxthread);
     }
 
     public boolean EnableConnectionPool = false;
-    public boolean DDrivers = false;
     public boolean canasync = false;
-
-    public int maxthread = 10;
-
 
     public final String ENCODING = config.getString("MySQL.property.encoding");
 
@@ -60,6 +47,8 @@ public class DataBaseConfig {
     public int getStorageType() {
         if (config.getString("Settings.storage-type").equalsIgnoreCase("MySQL")) {
             return 2;
+        }else if (config.getString("Settings.storage-type").equalsIgnoreCase("MariaDB")) {
+            return 3;
         }
         return 1;
     }
@@ -91,34 +80,34 @@ public class DataBaseConfig {
     }
 
     public boolean isMySQL() {
-        return getStorageType() == 2;
+        return getStorageType() == 2 || getStorageType() == 3;
     }
 
     public String gethost() {
         if (getStorageType() == 1) {
             return config.getString("SQLite.path");
-        } else if (getStorageType() == 2) {
+        } else if (getStorageType() == 2 || getStorageType() == 3) {
             return config.getString("MySQL.host");
         }
         return "";
     }
 
     public String getuser() {
-        if (getStorageType() == 2) {
+        if (getStorageType() == 2 || getStorageType() == 3) {
             return config.getString("MySQL.user");
         }
         return "";
     }
 
     public String getpass() {
-        if (getStorageType() == 2) {
+        if (getStorageType() == 2 || getStorageType() == 3) {
             return config.getString("MySQL.pass");
         }
         return "";
     }
 
     public String gettablesuffix() {
-        if (getStorageType() == 2) {
+        if (getStorageType() == 2 || getStorageType() == 3) {
             return config.getString("MySQL.table-suffix");
         }
         return "";
@@ -126,8 +115,12 @@ public class DataBaseConfig {
 
 
     public String geturl() {
-        if (getStorageType() == 2) {
-            String url = "jdbc:mysql://" + config.getString("MySQL.host")
+        if (getStorageType() == 2 || getStorageType() == 3) {
+            String url = "jdbc:mysql://";
+            if (getStorageType() == 3){
+                url = "jdbc:mariadb://";
+            }
+            url += config.getString("MySQL.host")
                     + ":" + config.getString("MySQL.port") + "/"
                     + config.getString("MySQL.database") + "?characterEncoding="
                     + ENCODING + "&useSSL="
@@ -152,6 +145,9 @@ public class DataBaseConfig {
                 break;
             case 2:
                 XConomy.getInstance().logger(null, 0, mess.replace("%type%", "MySQL"));
+                break;
+            case 3:
+                XConomy.getInstance().logger(null, 0, mess.replace("%type%", "MariaDB"));
                 break;
         }
     }

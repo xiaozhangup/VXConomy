@@ -5,17 +5,19 @@
 
     <groupId>me.yic</groupId>
     <artifactId>XConomy</artifactId>
-    <version>2.23.1</version>
+    <version>${revision}</version>
     <modules>
         <module>XConomy-Bukkit</module>
         <module>XConomy-Sponge7</module>
         <module>XConomy-Sponge8</module>
+        <module>XConomy-Paper</module>
         <module>XConomy-Core</module>
     </modules>
     <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>2.25.6</revision>
     </properties>
 
     <build>

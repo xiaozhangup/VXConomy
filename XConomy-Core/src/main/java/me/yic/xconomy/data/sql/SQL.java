@@ -21,13 +21,13 @@ package me.yic.xconomy.data.sql;
 import me.yic.xconomy.XConomy;
 import me.yic.xconomy.XConomyLoad;
 import me.yic.xconomy.data.DataFormat;
+import me.yic.xconomy.data.DataLink;
 import me.yic.xconomy.data.GetUUID;
-import me.yic.xconomy.data.ImportData;
 import me.yic.xconomy.data.caches.Cache;
 import me.yic.xconomy.data.caches.CacheNonPlayer;
+import me.yic.xconomy.data.syncdata.PlayerData;
 import me.yic.xconomy.info.RecordInfo;
 import me.yic.xconomy.utils.DatabaseConnection;
-import me.yic.xconomy.data.syncdata.PlayerData;
 import me.yic.xconomy.utils.UUIDMode;
 
 import java.math.BigDecimal;
@@ -46,9 +46,6 @@ public class SQL {
     public static String tableLoginName = "xconomylogin";
     public final static DatabaseConnection database = new DatabaseConnection();
     static final String encoding = XConomyLoad.DConfig.ENCODING;
-
-    public static boolean hasnonplayerplugin = false;
-
 
     public static boolean con() {
         return database.setGlobalConnection();
@@ -132,7 +129,7 @@ public class SQL {
             }
 
             statement.executeUpdate(query1);
-            if (hasnonplayerplugin || XConomyLoad.Config.NON_PLAYER_ACCOUNT) {
+            if (DataLink.hasnonplayerplugin || XConomyLoad.Config.NON_PLAYER_ACCOUNT) {
                 statement.executeUpdate(query2);
             }
             if (XConomyLoad.Config.UUIDMODE.equals(UUIDMode.SEMIONLINE)) {
@@ -152,7 +149,8 @@ public class SQL {
         }
     }
 
-    public static void getPlayerData(UUID uuid) {
+    public static PlayerData getPlayerData(UUID uuid) {
+        PlayerData bd = null;
         try {
             Connection connection = database.getConnectionAndCheck();
             String sql = "select * from " + tableName + " where UID = ?";
@@ -173,7 +171,7 @@ public class SQL {
                     Cache.insertIntoMultiUUIDCache(fuuid, uuid);
                 }
                 BigDecimal cacheThisAmt = DataFormat.formatString(rs.getString(3));
-                PlayerData bd = new PlayerData(fuuid, rs.getString(2), cacheThisAmt);
+                bd = new PlayerData(fuuid, rs.getString(2), cacheThisAmt);
                 Cache.insertIntoCache(fuuid, bd);
             }
 
@@ -183,10 +181,12 @@ public class SQL {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return bd;
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static void getPlayerData(String name) {
+    public static PlayerData getPlayerData(String name) {
+        PlayerData bd = null;
         try {
             Connection connection = database.getConnectionAndCheck();
             String query;
@@ -219,7 +219,7 @@ public class SQL {
                     String username = rs.getString(2);
                     BigDecimal cacheThisAmt = DataFormat.formatString(rs.getString(3));
                     if (cacheThisAmt != null) {
-                        PlayerData bd = new PlayerData(uuid, username, cacheThisAmt);
+                        bd = new PlayerData(uuid, username, cacheThisAmt);
                         Cache.insertIntoCache(uuid, bd);
                     }
                     break;
@@ -232,10 +232,12 @@ public class SQL {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return bd;
     }
 
 
-    public static void getNonPlayerData(String playerName) {
+    public static BigDecimal getNonPlayerData(String playerName) {
+        BigDecimal bal = null;
         try {
             Connection connection = database.getConnectionAndCheck();
             String query;
@@ -251,19 +253,16 @@ public class SQL {
 
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                CacheNonPlayer.insertIntoCache(playerName, DataFormat.formatString(rs.getString(2)));
-            } else {
-                BigDecimal bal = ImportData.getBalance(playerName, 0.0);
-
-                SQLCreateNewAccount.createNonPlayerAccount(playerName, bal.doubleValue(), connection);
+                bal = DataFormat.formatString(rs.getString("balance"));
                 CacheNonPlayer.insertIntoCache(playerName, bal);
             }
 
             rs.close();
             statement.close();
             database.closeHikariConnection(connection);
+            return bal;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

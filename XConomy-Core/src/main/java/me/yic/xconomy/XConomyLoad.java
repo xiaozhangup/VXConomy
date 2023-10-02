@@ -25,15 +25,13 @@ import me.yic.xconomy.info.DataBaseConfig;
 import me.yic.xconomy.info.DefaultConfig;
 import me.yic.xconomy.info.SyncChannalType;
 import me.yic.xconomy.lang.MessagesManager;
-
-import java.util.concurrent.ExecutorService;
+import me.yic.xconomy.utils.RedisConnection;
 
 public class XConomyLoad{
+    public static boolean DDrivers = false;
 
     public static DataBaseConfig DConfig;
     public static DefaultConfig Config;
-
-    public static ExecutorService FixedThreadPool;
 
     public static void LoadConfig(){
 
@@ -67,13 +65,15 @@ public class XConomyLoad{
     }
 
     public static void Unload() {
-
         if (Config.SYNCDATA_TYPE.equals(SyncChannalType.BUNGEECORD)) {
             AdapterManager.PLUGIN.unregisterIncomingPluginChannel("xconomy:aca", "me.yic.xconomy.listeners.SPsync");
             AdapterManager.PLUGIN.unregisterOutgoingPluginChannel("xconomy:acb");
+        }else if(Config.SYNCDATA_TYPE.equals(SyncChannalType.REDIS)) {
+            RedisConnection.close();
         }
 
-        XConomyLoad.FixedThreadPool.shutdown();
+        //AdapterManager.ScheduledThreadPool.shutdown();
+        //AdapterManager.FixedThreadPool.shutdown();
         SQL.close();
     }
 
@@ -81,7 +81,4 @@ public class XConomyLoad{
         return !Config.SYNCDATA_TYPE.equals(SyncChannalType.OFF);
     }
 
-    public static void runTaskAsynchronously(Runnable runnable){
-        FixedThreadPool.execute(runnable);
-    }
 }

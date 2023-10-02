@@ -18,6 +18,7 @@ import org.spongepowered.api.text.Text;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
 public class CPlugin implements iPlugin {
@@ -58,8 +59,13 @@ public class CPlugin implements iPlugin {
     }
 
     @Override
-    public void runTaskLaterAsynchronously(Runnable ra, long time) {
+    public void runTaskAsynchronously(Runnable runnable) {
+        Sponge.getScheduler().createAsyncExecutor(XConomy.getInstance()).execute(runnable);
+    }
 
+    @Override
+    public void runTaskLaterAsynchronously(Runnable ra, long time) {
+        Sponge.getScheduler().createAsyncExecutor(XConomy.getInstance()).schedule(ra, time, TimeUnit.MILLISECONDS);
     }
 
     @Override

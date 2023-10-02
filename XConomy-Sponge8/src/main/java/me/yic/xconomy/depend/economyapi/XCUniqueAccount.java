@@ -22,6 +22,7 @@ import me.yic.xconomy.AdapterManager;
 import me.yic.xconomy.XConomyLoad;
 import me.yic.xconomy.data.DataCon;
 import me.yic.xconomy.data.DataFormat;
+import me.yic.xconomy.data.syncdata.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cause;
@@ -42,11 +43,13 @@ import java.util.UUID;
 public class XCUniqueAccount implements UniqueAccount {
 
     private final UUID uuid;
-    //private final String name;
+    private final boolean isplayer;
+    private final String name;
 
-    public XCUniqueAccount(User player) {
+    public XCUniqueAccount(User player, boolean isplayer) {
         this.uuid = player.uniqueId();
-        //this.name = player.getName();
+        this.isplayer = isplayer;
+        this.name = player.name();
     }
 
     @Override
@@ -61,22 +64,34 @@ public class XCUniqueAccount implements UniqueAccount {
 
     @Override
     public boolean hasBalance(Currency currency, Set<Context> contexts) {
-        return true;
+        if (isplayer) {
+            return DataCon.getPlayerData(uuid) != null;
+        }else{
+            return DataCon.getAccountBalance(name) != null;
+        }
     }
 
     @Override
     public boolean hasBalance(Currency currency, Cause cause) {
-        return true;
+        return hasBalance(currency, (Set<Context>) null);
     }
 
     @Override
     public BigDecimal balance(Currency currency, Set<Context> contexts) {
-        if (DataCon.getPlayerData(uuid) != null) {
-            return DataCon.getPlayerData(uuid).getBalance();
-        } else {
-            return BigDecimal.ZERO;
+        if (isplayer) {
+            PlayerData pd = DataCon.getPlayerData(uuid);
+            if (pd != null) {
+                return pd.getBalance();
+            } else {
+                return BigDecimal.ZERO;
+            }
+        }else{
+            BigDecimal bal = DataCon.getAccountBalance(name);
+            if (bal != null) {
+                return bal;
+            }
         }
-
+        return BigDecimal.ZERO;
     }
 
     @Override
@@ -105,7 +120,11 @@ public class XCUniqueAccount implements UniqueAccount {
             return new XCTransactionResult(this,
                     currency, amount, contexts, ResultType.FAILED);
         }
-        DataCon.changeplayerdata("PLUGIN", uuid, amount, null, "SETBALANCE", null);
+        if (isplayer) {
+            DataCon.changeplayerdata("PLUGIN", uuid, amount, null, "SETBALANCE", null);
+        }else{
+            DataCon.changeaccountdata("PLUGIN", name, amount, null, "SETBALANCE");
+        }
         return new XCTransactionResult(this,
                 currency, BigDecimal.ZERO, contexts, ResultType.SUCCESS);
     }
@@ -127,6 +146,9 @@ public class XCUniqueAccount implements UniqueAccount {
 
     @Override
     public TransactionResult resetBalance(Currency currency, Set<Context> contexts) {
+        if (!isplayer) {
+            return null;
+        }
          if (AdapterManager.BanModiftyBalance()) {
             return new XCTransactionResult(this,
                     currency, BigDecimal.ZERO, contexts, ResultType.FAILED);
@@ -156,8 +178,11 @@ public class XCUniqueAccount implements UniqueAccount {
             return new XCTransactionResult(this,
                     currency, amount, contexts, ResultType.FAILED, TransactionTypes.DEPOSIT);
         }
-
-        DataCon.changeplayerdata("PLUGIN", uuid, amountFormatted, true, null, null);
+        if (isplayer) {
+            DataCon.changeplayerdata("PLUGIN", uuid, amountFormatted, true, null, null);
+        }else{
+            DataCon.changeaccountdata("PLUGIN", name, amountFormatted, true, null);
+        }
         return new XCTransactionResult(this,
                 currency, amount, contexts, ResultType.SUCCESS, TransactionTypes.DEPOSIT);
 
@@ -182,8 +207,11 @@ public class XCUniqueAccount implements UniqueAccount {
             return new XCTransactionResult(this,
                     currency, amount, contexts, ResultType.FAILED, TransactionTypes.WITHDRAW);
         }
-
-        DataCon.changeplayerdata("PLUGIN", uuid, amountFormatted, false, null, null);
+        if (isplayer) {
+            DataCon.changeplayerdata("PLUGIN", uuid, amountFormatted, false, null, null);
+        }else{
+            DataCon.changeaccountdata("PLUGIN", name, amountFormatted, false, null);
+        }
         return new XCTransactionResult(this,
                 currency, amount, contexts, ResultType.SUCCESS, TransactionTypes.WITHDRAW);
     }
