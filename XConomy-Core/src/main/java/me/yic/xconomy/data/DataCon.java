@@ -49,10 +49,13 @@ public class DataCon {
     }
 
     public static BigDecimal getAccountBalance(String account) {
+        BigDecimal bal = null;
         if (XConomyLoad.Config.DISABLE_CACHE){
             return DataLink.getBalNonPlayer(account);
         }
-        BigDecimal bal = CacheNonPlayer.getBalanceFromCacheOrDB(account);
+        if (CacheNonPlayer.CacheContainsKey(account)) {
+            bal = CacheNonPlayer.getBalanceFromCacheOrDB(account);
+        }
         if (bal == null){
             bal =  DataLink.getBalNonPlayer(account);
         }
@@ -78,6 +81,19 @@ public class DataCon {
         return pd;
     }
 
+    public static int getPlayerHiddenState(UUID uid) {
+        if (Cache.phids.containsKey(uid)){
+            return Cache.phids.get(uid);
+        }
+        if (DataLink.getPlayerData(uid) != null) {
+            return Cache.phids.get(uid);
+        }
+        return 1;
+    }
+    public static void removePlayerHiddenState(UUID uid) {
+        Cache.phids.remove(uid);
+    }
+
     public static void deletePlayerData(PlayerData pd) {
         DataLink.deletePlayerData(pd.getUniqueId());
         Cache.removefromCache(pd.getUniqueId());
@@ -94,8 +110,8 @@ public class DataCon {
 
     public static boolean hasaccountdatacache(String name) {
         return CacheNonPlayer.CacheContainsKey(name);
-
     }
+
     public static void deletedatafromcache(UUID u) {
         Cache.deleteDataFromCache(u);
     }
@@ -151,7 +167,7 @@ public class DataCon {
     @SuppressWarnings("ConstantConditions")
     public static void changeaccountdata(final String type, final String u, final BigDecimal amount, final Boolean isAdd, final String command) {
         BigDecimal newvalue = amount;
-        BigDecimal balance = CacheNonPlayer.getBalanceFromCacheOrDB(u);
+        BigDecimal balance = getAccountBalance(u);
 
         RecordInfo ri = new RecordInfo(type, command, null);
 

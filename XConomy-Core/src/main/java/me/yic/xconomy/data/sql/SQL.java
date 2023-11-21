@@ -173,6 +173,7 @@ public class SQL {
                 BigDecimal cacheThisAmt = DataFormat.formatString(rs.getString(3));
                 bd = new PlayerData(fuuid, rs.getString(2), cacheThisAmt);
                 Cache.insertIntoCache(fuuid, bd);
+                Cache.insertIntoHiddenMap(fuuid, rs.getInt(4));
             }
 
             rs.close();
@@ -221,6 +222,7 @@ public class SQL {
                     if (cacheThisAmt != null) {
                         bd = new PlayerData(uuid, username, cacheThisAmt);
                         Cache.insertIntoCache(uuid, bd);
+                        Cache.insertIntoHiddenMap(uuid, rs.getInt(4));
                     }
                     break;
                 }
@@ -420,7 +422,7 @@ public class SQL {
             statement.executeUpdate();
             statement.close();
             if (XConomyLoad.Config.UUIDMODE.equals(UUIDMode.SEMIONLINE)) {
-                query = "delete from " + tableName + " where DUUID = ?";
+                query = "delete from " + tableUUIDName + " where DUUID = ?";
                 statement = connection.prepareStatement(query);
                 statement.setString(1, UUID);
                 statement.executeUpdate();
@@ -484,6 +486,7 @@ public class SQL {
             statement.setString(2, u.toString());
             statement.executeUpdate();
             statement.close();
+            Cache.insertIntoHiddenMap(u, type);
 
         } catch (SQLException e) {
             e.printStackTrace();
